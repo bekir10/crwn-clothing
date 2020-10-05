@@ -5,6 +5,7 @@ import {persistReducer} from "redux-persist";//for storage
 import storage from "redux-persist/lib/storage";//for storage
 import directoryReducer from "./directory/directory.reducer"
 import shopReducer from "./shop/shop.reducer";
+
 const persistConfig = {
     key:"root",
     storage,
