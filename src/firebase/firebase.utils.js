@@ -21,12 +21,12 @@ export const createUserProfileDocument = async (userAuth, additionalData) =>{ //
   const userRef = firestore.doc(`users/${userAuth.uid}`);
   const snapShot = await userRef.get();
 
-  if(!snapShot.exists){//if doesnt exist
+  if(!snapShot.exists){//if doesnt exist --uvijek daje snapshot objekat bez obzira na rezultat
       const {displayName, email} = userAuth;
       const createdAt = new Date();
       
       try {
-          await userRef.set({
+          await userRef.set({ //ako ne postoji user u bazi kreiraj ga
               displayName,
               email,
               createdAt,
@@ -37,6 +37,36 @@ export const createUserProfileDocument = async (userAuth, additionalData) =>{ //
       }
   }
   return userRef;
+
+}
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+    const collectionRef = firestore.collection(collectionKey);
+
+    const batch = firestore.batch();
+    objectsToAdd.forEach(obj => {
+        const newDocRef = collectionRef.doc();
+        batch.set(newDocRef, obj);
+    })
+
+    return await batch.commit()
+}
+
+export const convertCollectionsSnapshotToMap = (collections) =>{
+    const transformedCollection = collections.docs.map(doc =>{
+        const {title,items} = doc.data();
+
+        return {
+            routeName: encodeURI(title.toLowerCase()),
+            id: doc.id,
+            title,
+            items
+        }
+    })
+    return transformedCollection.reduce((accumulator,collection) =>{
+        accumulator[collection.title.toLowerCase()] = collection;
+        return accumulator;
+    },{})
 
 }
 
